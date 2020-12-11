@@ -22,9 +22,9 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
 # GMP, MPFR, MPC
-find_package(GMP REQUIRED)
-find_package(MPFR REQUIRED)
-find_package(MPC REQUIRED)
+find_library(GMP NAMES gmp REQUIRED)
+find_library(MPFR NAMES mpfr REQUIRED)
+find_library(MPC NAMES mpc REQUIRED)
 
 # Eigen
 find_package(Eigen3 REQUIRED)
