@@ -21,6 +21,11 @@ set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
+# GMP, MPFR, MPC
+find_package(GMP REQUIRED)
+find_package(MPFR REQUIRED)
+find_package(MPC REQUIRED)
+
 # Eigen
 find_package(Eigen3 REQUIRED)
 if ( NOT EIGEN3_FOUND ) 
