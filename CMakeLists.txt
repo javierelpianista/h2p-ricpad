@@ -22,9 +22,17 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
 # GMP, MPFR, MPC
-find_library(GMP NAMES gmp REQUIRED)
-find_library(MPFR NAMES mpfr REQUIRED)
-find_library(MPC NAMES mpc REQUIRED)
+find_library(gmp "gmp")
+foreach(lib gmp mpfr mpc ginac cln)
+    find_library("${lib}" "${lib}")
+    if ( ${${lib}} STREQUAL "${lib}-NOTFOUND" ) 
+        message( FATAL_ERROR 
+"Library ${lib} not found. One way to specify the path to libraries is by adding -DCMAKE_LIBRARY_PATH= <list-of-library-paths> to the cmake call, for example: 
+cmake .. -DCMAKE_LIBRARY_PATH=\"/home/user/libs\"
+If several paths are specified, they should be separated by ; .")
+    endif()
+endforeach()
+
 
 # Eigen
 find_package(Eigen3 REQUIRED)
