@@ -42,8 +42,10 @@ add_executable(h2p src/h2p.cpp)
 target_link_libraries(
     h2p PUBLIC ricpad Boost::boost Eigen3::Eigen mpfr mpc cln ginac )
 
+add_executable(main src/main.cpp)
+target_link_libraries(
+    main PUBLIC ricpad Boost::boost Eigen3::Eigen mpfr mpc cln ginac )
+
 # Installation
 install(TARGETS h2p
     RUNTIME DESTINATION bin)
-
-
