@@ -33,7 +33,6 @@ If several paths are specified, they should be separated by ; .")
     endif()
 endforeach()
 
-
 # Eigen
 find_package(Eigen3 REQUIRED)
 if ( NOT EIGEN3_FOUND ) 
@@ -42,7 +41,9 @@ endif()
 
 # Boost
 find_package(Boost REQUIRED)
-message(STATUS "Boost version: ${Boost_VERSION}")
+if ( Boost_FOUND ) 
+    include_directories(${Boost_INCLUDE_DIRS})
+endif()
 
 set(Boost_USE_STATIC_LIBS OFF)
 set(Boost_USE_MULTITHREADED ON)
