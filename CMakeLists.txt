@@ -41,8 +41,13 @@ if ( NOT EIGEN3_FOUND )
 endif()
 
 # Boost
-find_package(Boost REQUIRED)
-message(STATUS "Boost version: ${Boost_VERSION}")
+find_package(Boost REQUIRED 
+    COMPONENTS program_options
+    VERSION 1.69)
+
+if ( Boost_FOUND ) 
+    include_directories(${Boost_INCLUDE_DIRS})
+endif()
 
 set(Boost_USE_STATIC_LIBS OFF)
 set(Boost_USE_MULTITHREADED ON)
@@ -57,7 +62,8 @@ target_link_libraries(
 
 add_executable(main src/main.cpp)
 target_link_libraries(
-    main PUBLIC ricpad Boost::boost Eigen3::Eigen mpfr mpc cln ginac )
+    main PUBLIC ricpad 
+    Boost::boost Boost::program_options Eigen3::Eigen mpfr mpc cln ginac )
 
 # Installation
 install(TARGETS h2p
