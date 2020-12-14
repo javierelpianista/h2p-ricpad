@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.9)
+cmake_minimum_required(VERSION 3.13)
 
 # Project name and description
 project(
@@ -40,17 +40,18 @@ if ( NOT EIGEN3_FOUND )
 endif()
 
 # Boost
-find_package(Boost REQUIRED 
+set(Boost_USE_STATIC_LIBS ON)
+set(Boost_USE_MULTITHREADED ON)
+set(Boost_USE_STATIC_RUNTIME OFF)
+
+find_package(Boost 1.69 
     COMPONENTS program_options
-    VERSION 1.69)
+    REQUIRED
+    )
 
 if ( Boost_FOUND ) 
     include_directories(${Boost_INCLUDE_DIRS})
 endif()
-
-set(Boost_USE_STATIC_LIBS OFF)
-set(Boost_USE_MULTITHREADED ON)
-set(Boost_USE_STATIC_RUNTIME OFF)
 
 add_subdirectory(ricpad)
 
