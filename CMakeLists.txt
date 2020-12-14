@@ -33,7 +33,6 @@ If several paths are specified, they should be separated by ; .")
     endif()
 endforeach()
 
-
 # Eigen
 find_package(Eigen3 REQUIRED)
 if ( NOT EIGEN3_FOUND ) 
