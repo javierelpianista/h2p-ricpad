@@ -1,6 +1,7 @@
 #include <sstream>
 #include <ricpad/conversions.hpp>
 #include <boost/multiprecision/mpfr.hpp>
+#include <boost/multiprecision/mpc.hpp>
 
 namespace mp = boost::multiprecision;
 using mp::mpfr_float;
@@ -41,4 +42,14 @@ mpc_complex ex_to_mp<mpc_complex>( const gi::ex& numex ) {
 
     return ans;
 };
+
+template <>
+mpfr_float assign_h(const mpfr_float &tol) {
+    return tol;
+}
+
+template <>
+mpc_complex assign_h(const mpfr_float &tol) {
+    return mp::sqrt(mpfr_float(2))*tol*mpc_complex("(1,1)");
+}
 };

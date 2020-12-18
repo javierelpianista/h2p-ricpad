@@ -1,3 +1,6 @@
+#ifndef CONVERSIONS
+#define CONVERSIONS
+
 #include <sstream>
 #include <boost/multiprecision/mpfr.hpp>
 #include <boost/multiprecision/mpc.hpp>
@@ -17,7 +20,7 @@ using std::endl;
 gi::ex mp_to_ex( const mpfr_float& );
 gi::ex mp_to_ex( const mpc_complex& );
 
-template <class T>
+template <typename T>
 T ex_to_mp(const gi::ex& num) 
 {
     std::ostringstream oss;
@@ -26,5 +29,13 @@ T ex_to_mp(const gi::ex& num)
     return T(oss.str());
 };
 
+template <typename T>
+T assign_h(const mpfr_float &tol) {
+    cout << "assign_h is not defined for the selected typename." << endl;
+    return -1;
+};
+
 }; // namespace conversions
 }; // namespace ricpad
+
+#endif

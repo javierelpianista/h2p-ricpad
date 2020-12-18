@@ -32,7 +32,7 @@ Eigen::Matrix<C,N,1> NR_solve(
     Eigen::Matrix<C, N, N> jacobian, inv_jacobian;
     Eigen::Matrix<C, N, 1> x(x0), xold;
     R desv = tol + 1;
-    static const char* function = "ricpad::solver::NR_solve<%1%>";
+    static const char* function = "ricpad::solver::NR_solvj<%1%>";
 
     int niter = 0;
 

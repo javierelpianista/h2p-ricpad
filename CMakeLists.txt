@@ -13,7 +13,7 @@ if ( NOT CMAKE_BUILD_TYPE )
 endif()
 
 # Compile flags
-set(CMAKE_CXX_FLAGS_RELEASE "-O3")
+set(CMAKE_CXX_FLAGS_RELEASE "-O2")
 set(CMAKE_CXX_FLAGS_DEBUG "-O0 -g")
 
 # C++ standard options
@@ -55,16 +55,17 @@ endif()
 
 add_subdirectory(ricpad)
 
-# The H2+ program
-add_executable(h2p src/h2p.cpp)
-target_link_libraries(
-    h2p PUBLIC ricpad Boost::boost Eigen3::Eigen mpfr mpc cln ginac )
-
 add_executable(main src/main.cpp)
 target_link_libraries(
-    main PUBLIC ricpad 
-    Boost::boost Boost::program_options Eigen3::Eigen mpfr mpc cln ginac )
-
-# Installation
-install(TARGETS h2p
-    RUNTIME DESTINATION bin)
+    main PUBLIC 
+    ricpad 
+    Boost::boost
+    Boost::program_options
+    Eigen3::Eigen
+    mpfr
+    mpc
+    cln
+    ginac 
+    )
+target_include_directories(
+    main PUBLIC src/include)
