@@ -55,9 +55,9 @@ endif()
 
 add_subdirectory(ricpad)
 
-add_executable(main src/main.cpp)
+add_executable(h2p-ricpad src/main.cpp)
 target_link_libraries(
-    main PUBLIC 
+    h2p-ricpad PUBLIC 
     ricpad 
     Boost::boost
     Boost::program_options
@@ -68,4 +68,4 @@ target_link_libraries(
     ginac 
     )
 target_include_directories(
-    main PUBLIC src/include)
+    h2p-ricpad PUBLIC src/include)

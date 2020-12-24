@@ -1,4 +1,5 @@
 #include <iostream>
+#include <fstream>
 #include <array>
 #include <string>
 #include <vector>
@@ -45,13 +46,6 @@ void print_help_message(std::string const &a = "") {
 int main(int argc, char* argv[]) {
     mandatory.add_options() 
         ("Dmin", po::value<int>(), "Minimum D value")
-        ("d", po::value<int>()->default_value(0), "Value of d")
-        ("m", po::value<int>()->default_value(0), 
-         "Value of the quantum number associated with the angular part of the"
-         " spheroidal equations")
-        ("s", po::value<int>()->default_value(0),
-         "Value stating if the second spheroidal equation's eigenfuncions are"
-         " even (s=0) or odd (s=1).")
         ("U0", po::value<std::string>(), 
          "Initial value of the electronic+nuclear energy")
         ("A0", po::value<std::string>(),
@@ -64,23 +58,38 @@ int main(int argc, char* argv[]) {
          ->zero_tokens()
          ->implicit_value("")
          ->notifier(&print_help_message)
-         , "Print this message.")
-        ("Dmax", po::value<int>()->default_value(-1), "Maximum D value")
+         , "Print this message")
+        ("Dmax", po::value<int>()->default_value(-1), 
+         "Maximum D value. If Dmax == -1, Dmax is assumed to be infinite")
+        ("d", po::value<int>()->default_value(0), "Value of d")
+        ("m", po::value<int>()->default_value(0), 
+         "Value of the quantum number associated with the angular part of the"
+         " spheroidal equations")
+        ("s", po::value<int>()->default_value(0),
+         "Value stating if the second spheroidal equation's eigenfuncions are"
+         " even (s=0) or odd (s=1)")
         ("ndigits", po::value<int>()->default_value(1000),
          "Number of digits for the numerical calculations")
         ("tol", po::value<std::string>()->default_value("1E-100"),
          "Tolerance for the Newton-Raphson method")
         ("h", po::value<std::string>()->default_value("1E-200"),
          "Step size for the Newton-Raphson method")
-        ("h2", po::value<std::string>()->default_value("1E-400"),
-         "Step size for the Newton-Raphson for the computation of numerical derivations outside the Newton-Raphson iterations")
+        ("hd", po::value<std::string>()->default_value("1E-400"),
+         "Step size for the Newton-Raphson for the computation of numerical differentiation outside the Newton-Raphson iterations (Set this to at least sqrt(h))")
         ("use-E", po::bool_switch()->default_value(false), 
          "Set this option if the provided value of U0 is the electronic "
          "energy, instead of the electronic + nuclear one")
+        ("no-log", po::bool_switch()->default_value(false), 
+         "Set this option if you don't want h2p to output to any files")
+        ("log-nr", po::bool_switch()->default_value(false), 
+         "Set this option to print out each Newton-Raphson iteration")
+        ("output-file,o", po::value<std::string>(), "Output file")
+        ("nr-max-iter", po::value<int>()->default_value(100), 
+         "Maximum number of Newton-Raphson iterations")
         ;
 
     hidden.add_options()
-        ("mode", "" ) 
+        ("mode", po::value<std::string>(), "" ) 
         ;
 
     p_desc.add("mode", -1);
@@ -131,17 +140,40 @@ int main(int argc, char* argv[]) {
 
     // Dmax
     int Dmax;
-    if ( vm.count("Dmax") ) {
-        Dmax = vm["Dmax"].as<int>();
-    } else { 
-        Dmax = -1;
-    }
+    Dmax = vm["Dmax"].as<int>();
+
+    // d
+    int d = vm["d"].as<int>();
 
     // Quantum numbers
     int m = vm["m"].as<int>();
     int s = vm["s"].as<int>();
 
-    mpfr_float tol, h, h2;
+    // Output file
+    std::string output_file;
+
+    if ( ! vm["no-log"].as<bool>() ) {
+        if ( vm.count("output-file") ) {
+            output_file = vm["output-file"].as<std::string>();
+        } else {
+            std::string basename, log_file;
+
+            basename = "h2p.log";
+            log_file = basename;
+
+            bool file_exists = std::ifstream(log_file).good();
+            int i = 0;
+
+            while ( file_exists ) {
+                log_file = basename + "." + std::to_string(i++);
+                file_exists = std::ifstream(log_file).good();
+            }
+
+            output_file = log_file;
+        }
+    }
+
+    mpfr_float tol, h, hd;
 
     // Digits for calculations
     { 
@@ -151,7 +183,7 @@ int main(int argc, char* argv[]) {
         gi::Digits = ndigits;
         tol = mpfr_float(vm["tol"].as<std::string>());
         h   = mpfr_float(vm["h"].as<std::string>());
-        h2  = mpfr_float(vm["h2"].as<std::string>());
+        hd  = mpfr_float(vm["hd"].as<std::string>());
     }
 
     // Initial values
@@ -164,13 +196,21 @@ int main(int argc, char* argv[]) {
     // one
     bool use_E = vm["use-E"].as<bool>();
 
+    // Log the Newton-Raphson iterations
+    bool log_nr = vm["log-nr"].as<bool>();
+
+    // Maximum number of Newton-Raphson iterations
+    int nr_max_iter = vm["nr-max-iter"].as<int>();
+
     cout.precision(40);
 
     if ( vm["mode"].as<std::string>() == "minimum" ) {
-        R_eq<mpfr_float>(Dmin, Dmax, U0, A0, R0, 0, false, tol, h, h2);
+        R_eq<mpfr_float>(Dmin, Dmax, m, s, U0, A0, R0, d, tol, h,
+            hd, output_file, log_nr, nr_max_iter);
         return 0;
     } else if ( vm["mode"].as<std::string>() == "fixed" ) {
-        UA<mpfr_float>(Dmin, Dmax, m, s, U0, A0, R0, 0, tol, h, h2, use_E);
+        UA<mpfr_float>(Dmin, Dmax, m, s, U0, A0, R0, d, tol, h, hd, use_E, 
+            output_file, log_nr, nr_max_iter);
         return 0;
     } else {
         return 1;

@@ -22,16 +22,19 @@ template<typename num_t>
 void R_eq(
     const int Dmin,
     const int Dmax,
+    const int m, 
+    const int s, 
     const num_t &U0, 
     const num_t &A0,
     const num_t &R0,
     // Use a scheme of automatic determination of numerical precision in each step
     const int d = 0,
-    const bool auto_prec = true,
     mpfr_float tol = -1,
     num_t h = -1, 
     num_t h2 = -1, 
-    const mpfr_float &prec_ini = -1
+    const std::string output_file = "",
+    const bool log_nr = false,
+    const int nr_max_iter = 100
 ) {
     using ricpad::hankdet::hankdet;
     using ricpad::solver::NR_solve;
@@ -39,26 +42,9 @@ void R_eq(
 
     int ndigits;
 
-    if ( auto_prec ) {
-        if ( prec_ini == -1 ) {
-            tol = mpfr_float("1E-10");
-        } else {
-            tol = prec_ini;
-        }
-        h = assign_h<num_t>(tol*tol);
-        h2 = h*h;
-
-        ndigits = (-mp::log10(tol)*8).convert_to<int>();
-        num_t::default_precision(ndigits);
-        mpfr_float::default_precision(ndigits);
-        gi::Digits = ndigits;
-    } else {
-        ndigits = num_t::default_precision();
-    }
-
     num_t U = U0, R = R0, A = A0;
 
-    int D = Dmin, m = 0, s = 0;
+    int D = Dmin;
 
     std::function<num_t(Eigen::Matrix<num_t,3,1>&)> 
         fun_m, fun_l, fun_d; 
@@ -127,11 +113,16 @@ void R_eq(
     params(1) = A;
     params(2) = R;
 
-    std::ofstream U_stream, A_stream, R_stream;
-    
-    for ( ; D<=Dmax; D++ ) {
+    std::ofstream out_stream;
+
+    for ( ; D<=Dmax || Dmax == -1; D++ ) {
         params_old = params;
-        params = NR_solve<num_t, mpfr_float, 3>(F, params, tol, h);
+        if ( output_file != "" ) {
+            out_stream.open(output_file, std::ios::app);
+        }
+        params = NR_solve<num_t, mpfr_float, 3>(F, params, tol, h,
+                nr_max_iter, log_nr, out_stream);
+
         U = mpfr_float(params(0));
         A = mpfr_float(params(1));
         R = mpfr_float(params(2));
@@ -141,20 +132,23 @@ void R_eq(
         cout << params(0).real() << " " << params(1).real() << " " << 
             params(2).real() << " " << std::setprecision(4) << dif << endl;
 
-        U_stream.open("U.dat", std::ios::app);
-        U_stream << std::setprecision(params(0).precision()) << params(0).real()
-            << endl;
-        U_stream.close();
+        if ( output_file != "" ) {
+            out_stream << " D = " 
+                << std::left
+                << std::setw(3) << D << " "
+                << std::setw(params(0).precision() + 10)
+                << std::setprecision(params(0).precision()) 
+                << params(0)  
+                << std::setw(params(1).precision() + 10)
+                << std::setprecision(params(1).precision()) 
+                << params(1)  
+                << std::setw(params(2).precision() + 10)
+                << std::setprecision(params(2).precision()) 
+                << params(2)  
+                << endl;
 
-        A_stream.open("A.dat", std::ios::app);
-        A_stream << std::setprecision(params(1).precision()) << params(1).real()
-            << endl;
-        A_stream.close();
-
-        R_stream.open("R.dat", std::ios::app);
-        R_stream << std::setprecision(params(2).precision()) << params(2).real()
-            << endl;
-        R_stream.close();
+            out_stream.close();
+        }
 
         dif_vec = params - params_old;
         dif = 1;
@@ -163,15 +157,8 @@ void R_eq(
             dif = min(dif, mp::abs(dif_vec(i)));
         }
 
-        if ( auto_prec ) {
-            tol = min(tol, dif*1E-10);
-            h = assign_h<num_t>(tol*tol);
-            h2 = h*h;
-
-            ndigits = (-mp::log10(tol)*16).convert_to<int>();
-            num_t::default_precision(ndigits);
-            mpfr_float::default_precision(ndigits);
-            gi::Digits = ndigits;
+        for ( int i = 0; i<2; i++ ) {
+            dif = min(dif, mp::abs(dif_vec(i)));
         }
     }
 }

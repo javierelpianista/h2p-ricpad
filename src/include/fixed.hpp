@@ -30,7 +30,10 @@ void UA(
     mpfr_float tol = -1,
     num_t h = -1, 
     num_t h2 = -1,
-    const bool use_E = false
+    const bool use_E = false,
+    const std::string output_file = "",
+    const bool log_nr = false, 
+    const int nr_max_iter = 100
     )
 
 {
@@ -66,16 +69,6 @@ void UA(
             coefs.erase(coefs.begin(), coefs.begin()+d+1);
             num_t ans = hankdet<num_t>(D,coefs);
 
-            /*
-            cout << "-----------------------------------------" << endl;
-            cout  << "U" << " "<< U << endl;
-            cout  << "A" << " "<< A << endl;
-            cout  << "R" << " "<< R << endl;
-            cout  << "Dm"<< " " << ans << endl;
-            cout << "-----------------------------------------" << endl;
-            cout << endl;
-            */
-
             return ans;
     };
 
@@ -92,16 +85,6 @@ void UA(
             coefs.erase(coefs.begin(), coefs.begin()+d+2);
             num_t ans = hankdet<num_t>(D,coefs);
 
-            /*
-            cout << "-----------------------------------------" << endl;
-            cout << "U" <<  " " << U << endl;
-            cout << "A" <<  " " << A << endl;
-            cout << "R" <<  " " << R << endl;
-            cout << "Dl" << " " <<  ans << endl;
-            cout << "-----------------------------------------" << endl;
-            cout << endl;
-            */
-
             return ans;
     };
     
@@ -117,26 +100,32 @@ void UA(
     params(0) = U;
     params(1) = A;
 
-    std::ofstream U_stream, A_stream, R_stream;
+    std::ofstream out_stream;
 
-    for ( ; D<=Dmax; D++ ) {
+    for ( ; D<=Dmax || Dmax == -1; D++ ) {
         params_old = params;
-        params = NR_solve<num_t, mpfr_float, 2>(F, params, tol, h);
+
+        if ( output_file != "" ) {
+            out_stream.open(output_file, std::ios::app);
+        }
+        params = NR_solve<num_t, mpfr_float, 2>(F, params, tol, h, 
+            nr_max_iter, log_nr, out_stream);
 
         cout.precision(30);
         cout << " D = " << std::setw(2) << D << " ";
-        cout << params(0).real() + Up.real() << " " << params(1).real() << 
+        cout << params(0)+ Up<< " " << params(1)<< 
             " " << std::setprecision(4) << dif << endl;
 
-        U_stream.open("U.dat", std::ios::app);
-        U_stream << std::setprecision(params(0).precision()) << 
-            params(0).real() + Up.real() << endl;
-        U_stream.close();
+        if ( output_file != "" ) {
+            out_stream << " D = " 
+                << std::left
+                << std::setw(3) << D << " "
+                << std::setw(params(0).precision() + 10)
+                << std::setprecision(params(0).precision()) 
+                << params(0) + Up << params(1) << endl; 
 
-        A_stream.open("A.dat", std::ios::app);
-        A_stream << std::setprecision(params(1).precision()) << params(1).real()
-            << endl;
-        A_stream.close();
+            out_stream.close();
+        }
 
         dif_vec = params - params_old;
         dif = 1;

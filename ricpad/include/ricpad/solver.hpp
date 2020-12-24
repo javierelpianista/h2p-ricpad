@@ -1,6 +1,8 @@
 #ifndef RICPAD_SOLVER
 #define RICPAD_SOLVER
 
+#include <iostream>
+
 #include <boost/multiprecision/mpfr.hpp>
 #include <boost/multiprecision/mpc.hpp>
 #include <boost/math/policies/error_handling.hpp>
@@ -25,26 +27,19 @@ Eigen::Matrix<C,N,1> NR_solve(
         Eigen::Matrix<C,N,1> x0,
         const R& tol, 
         const C& h,
-        const int maxiter = 100
+        const int maxiter = 100,
+        const bool log_iters = false,
+        std::ostream &out_stream = cout
         ) 
 {
     using ricpad::differentiate::differentiate;
     Eigen::Matrix<C, N, N> jacobian, inv_jacobian;
     Eigen::Matrix<C, N, 1> x(x0), xold;
     R desv = tol + 1;
-    static const char* function = "ricpad::solver::NR_solvj<%1%>";
+    static const char* function = "ricpad::solver::NR_solver";
 
     int niter = 0;
 
-    /*
-    if ( f.size() != N ) {
-        cout << "The size of f is wrong." << endl;
-        return 1;
-    } else if ( x.size() != N ) {
-        cout << "The size of x is wrong." << endl;
-        return 1;
-    }
-    */
     C val;
 
     while ( desv > tol ) {
@@ -63,6 +58,17 @@ Eigen::Matrix<C,N,1> NR_solve(
 
         xold = x;
         x = x - inv_jacobian * F;
+
+        if ( log_iters ) {
+            out_stream << " << ";
+            for ( int i = 0; i < N; i++ ) {
+                out_stream << std::setw(x0(0).precision() + 10) 
+                    << std::left 
+                    << std::setprecision(x0(0).precision())
+                    << x(i);
+            }
+            out_stream << endl;
+        }
 
         desv = (x - xold).norm();
 
