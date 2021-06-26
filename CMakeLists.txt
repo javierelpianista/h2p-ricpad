@@ -67,5 +67,6 @@ target_link_libraries(
     cln
     ginac 
     )
+
 target_include_directories(
     h2p-ricpad PUBLIC src/include)

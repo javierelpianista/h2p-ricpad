@@ -34,7 +34,8 @@ void R_eq(
     num_t h2 = -1, 
     const std::string output_file = "",
     const bool log_nr = false,
-    const int nr_max_iter = 100
+    const int nr_max_iter = 100,
+    const bool double_D_lambda = false
 ) {
     using ricpad::hankdet::hankdet;
     using ricpad::solver::NR_solve;
@@ -44,8 +45,16 @@ void R_eq(
 
     num_t U = U0, R = R0, A = A0;
 
-    int D = Dmin;
+    int D = Dmin, doub;
 
+    if ( double_D_lambda ) {
+        doub = 2;
+    } else {
+        doub = 1;
+    };
+
+    cout << "s = " << s << endl;
+    cout << "m = " << m << endl;
     std::function<num_t(Eigen::Matrix<num_t,3,1>&)> 
         fun_m, fun_l, fun_d; 
 
@@ -66,19 +75,19 @@ void R_eq(
             return ans;
     };
 
-    fun_l = [&D, &d, &m]
+    fun_l = [&D, &d, &m, &doub]
         ( Eigen::Matrix<num_t,3,1>& param ) -> num_t { 
             num_t &U = param[0];
             num_t &A = param[1];
             num_t &R = param[2];
 
             std::vector<num_t> plv, qlv, coefs;
-            plv = coefficients::pl<num_t>(2*D+d+2);
-            qlv = coefficients::ql<num_t>(2*D+d+2, U, A, R, m);
+            plv = coefficients::pl<num_t>(doub*(2*D+1)+d);
+            qlv = coefficients::ql<num_t>(doub*(2*D+1)+d, U, A, R, m);
 
-            coefs = coefsl<num_t>(2*D+d-1, U, A, R, m, plv, qlv);
+            coefs = coefsl<num_t>(doub*2*D+d-1, U, A, R, m, plv, qlv);
             coefs.erase(coefs.begin(), coefs.begin()+d+2);
-            num_t ans = hankdet<num_t>(D,coefs);
+            num_t ans = hankdet<num_t>(doub*D,coefs);
 
             return ans;
     };

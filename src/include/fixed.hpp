@@ -25,15 +25,15 @@ void UA(
     const num_t &U0, 
     const num_t &A0,
     const num_t &R,
-    // Use a scheme of automatic determination of numerical precision in each step
     const int d = 0,
     mpfr_float tol = -1,
     num_t h = -1, 
-    num_t h2 = -1,
     const bool use_E = false,
     const std::string output_file = "",
     const bool log_nr = false, 
-    const int nr_max_iter = 100
+    const int nr_max_iter = 100,
+    const bool double_D_lambda = false,
+    const bool double_D_mu = false
     )
 
 {
@@ -51,39 +51,51 @@ void UA(
         Up = 0;
     }
 
-    int D = Dmin;
+    int D = Dmin, double_l, double_m;
+
+    if ( double_D_lambda ) {
+        double_l = 2;
+    } else {
+        double_l = 1;
+    };
+
+    if ( double_D_mu ) {
+        double_m = 2;
+    } else {
+        double_m = 1;
+    };
 
     std::function<num_t(Eigen::Matrix<num_t,2,1>&)> 
         fun_m, fun_l; 
 
-    fun_m = [&D, &d, &s, &m, &R]
+    fun_m = [&D, &d, &s, &m, &R, &double_m]
         ( Eigen::Matrix<num_t,2,1>& param ) -> num_t {
             num_t &U = param[0];
             num_t &A = param[1];
 
             std::vector<num_t> pmv, qmv, coefs; 
-            pmv = coefficients::pm<num_t>(2*D+d+1);
-            qmv = coefficients::qm<num_t>(2*D+d+1, U, A, R, m);
+            pmv = coefficients::pm<num_t>(double_m*(2*D+1)+d);
+            qmv = coefficients::qm<num_t>(double_m*(2*D+1)+d, U, A, R, m);
 
-            coefs = coefsm<num_t>(2*D+d-1, s, pmv, qmv);
+            coefs = coefsm<num_t>(double_m*2*D-1+d, s, pmv, qmv);
             coefs.erase(coefs.begin(), coefs.begin()+d+1);
-            num_t ans = hankdet<num_t>(D,coefs);
+            num_t ans = hankdet<num_t>(double_m*D,coefs);
 
             return ans;
     };
 
-    fun_l = [&D, &d, &m, &R]
+    fun_l = [&D, &d, &m, &R, &double_l]
         ( Eigen::Matrix<num_t,2,1>& param ) -> num_t { 
             num_t &U = param[0];
             num_t &A = param[1];
 
             std::vector<num_t> plv, qlv, coefs;
-            plv = coefficients::pl<num_t>(2*D+d+2);
-            qlv = coefficients::ql<num_t>(2*D+d+2, U, A, R, m);
+            plv = coefficients::pl<num_t>(double_l*(2*D+1)+d);
+            qlv = coefficients::ql<num_t>(double_l*(2*D+1)+d, U, A, R, m);
 
-            coefs = coefsl<num_t>(2*D+d-1, U, A, R, m, plv, qlv);
+            coefs = coefsl<num_t>(double_l*2*D+d-1, U, A, R, m, plv, qlv);
             coefs.erase(coefs.begin(), coefs.begin()+d+2);
-            num_t ans = hankdet<num_t>(D,coefs);
+            num_t ans = hankdet<num_t>(double_l*D,coefs);
 
             return ans;
     };

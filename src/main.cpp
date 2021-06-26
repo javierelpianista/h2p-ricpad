@@ -12,6 +12,8 @@
 #include <h2p.hpp>
 #include <req.hpp>
 #include <fixed.hpp>
+#include <coupling.hpp>
+#include <fixed_u.hpp>
 
 using std::cout;
 using std::endl;
@@ -24,7 +26,8 @@ using mp::mpc_complex;
 using mp::mpfr_float;
 
 po::options_description 
-    mandatory("Required options"), 
+    mandatory("Required options for two- and three-parameters methods"), 
+    mandatory2("Required options for one-parameter methods"), 
     optional("Non-mandatory options"), 
     hidden, opts;
 po::positional_options_description p_desc;
@@ -33,7 +36,9 @@ po::variables_map vm;
 const auto help_message = "Usage: h2p-ricpad MODE OPTIONS\n\n"
         "MODE can be either 'minimum' for computing U, A, and "
         " R simultaneously for the equilibrium internuclear distance, "
-        " or 'fixed', for computing U and A for a given R.\n\n";
+        " 'fixed', for computing U and A for a given R, "
+        " 'coupling', for computing the coupling constant A, given U and R, "
+        " 'fixed-U', for computing U given A and R.\n";
 
 const std::array<const std::string, 2> required_options { "Dmin", "variable" }; 
 
@@ -62,6 +67,10 @@ int main(int argc, char* argv[]) {
         ("Dmax", po::value<int>()->default_value(-1), 
          "Maximum D value. If Dmax == -1, Dmax is assumed to be infinite")
         ("d", po::value<int>()->default_value(0), "Value of d")
+        ("double-D-lambda", po::bool_switch()->default_value(false), 
+         "Double the value of D for the lambda equation. Useful at small R.")
+        ("double-D-mu", po::bool_switch()->default_value(false),
+         "Double the value of D for the mu equation. Useful at large R.")
         ("m", po::value<int>()->default_value(0), 
          "Value of the quantum number associated with the angular part of the"
          " spheroidal equations")
@@ -86,6 +95,9 @@ int main(int argc, char* argv[]) {
         ("output-file,o", po::value<std::string>(), "Output file")
         ("nr-max-iter", po::value<int>()->default_value(100), 
          "Maximum number of Newton-Raphson iterations")
+        ("target-digits", po::value<int>()->default_value(-1),
+         "Target number of digits. If this number is reached, the program "
+         "stops.")
         ;
 
     hidden.add_options()
@@ -106,7 +118,7 @@ int main(int argc, char* argv[]) {
     // First check if the user asked for help or if they didn't set the 
     // mode correctly.
     const std::vector<std::string> available_modes = {
-        "minimum", "fixed"
+        "minimum", "fixed", "coupling", "fixed-U"
     };
 
     if ( vm.count("mode") ) {
@@ -202,15 +214,27 @@ int main(int argc, char* argv[]) {
     // Maximum number of Newton-Raphson iterations
     int nr_max_iter = vm["nr-max-iter"].as<int>();
 
+    // Double the value of D for the lambda-equation
+    bool double_D_lambda = vm["double-D-lambda"].as<bool>();
+    bool double_D_mu     = vm["double-D-mu"].as<bool>();
+
     cout.precision(40);
 
     if ( vm["mode"].as<std::string>() == "minimum" ) {
         R_eq<mpfr_float>(Dmin, Dmax, m, s, U0, A0, R0, d, tol, h,
-            hd, output_file, log_nr, nr_max_iter);
+            hd, output_file, log_nr, nr_max_iter, double_D_lambda);
         return 0;
     } else if ( vm["mode"].as<std::string>() == "fixed" ) {
-        UA<mpfr_float>(Dmin, Dmax, m, s, U0, A0, R0, d, tol, h, hd, use_E, 
-            output_file, log_nr, nr_max_iter);
+        UA<mpfr_float>(Dmin, Dmax, m, s, U0, A0, R0, d, tol, h, use_E, 
+            output_file, log_nr, nr_max_iter, double_D_lambda, double_D_mu);
+        return 0;
+    } else if ( vm["mode"].as<std::string>() == "coupling" ) {
+        coupling<mpfr_float>(Dmin, Dmax, m, s, U0, A0, R0, d, tol, h, use_E,
+                output_file, log_nr, nr_max_iter);
+        return 0;
+    } else if ( vm["mode"].as<std::string>() == "fixed-U" ) {
+        U<mpfr_float>(Dmin, Dmax, m, s, U0, A0, R0, d, tol, h, use_E,
+                output_file, log_nr, nr_max_iter);
         return 0;
     } else {
         return 1;
