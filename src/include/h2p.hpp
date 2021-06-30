@@ -6,7 +6,6 @@
 #include <fstream>
 
 #include <boost/multiprecision/mpfr.hpp>
-#include <boost/multiprecision/mpc.hpp>
 #include <boost/multiprecision/eigen.hpp>
 #include <ginac/ginac.h>
 #include <Eigen/Dense>
@@ -16,7 +15,6 @@
 #include <ricpad/conversions.hpp>
 
 using boost::multiprecision::mpfr_float;
-using boost::multiprecision::mpc_complex;
 
 using std::cout;
 using std::endl;
