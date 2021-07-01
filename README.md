@@ -39,7 +39,10 @@ If succesful, an executable named `h2p-ricpad` will be created in this folder.
 
     Usage: h2p-ricpad MODE OPTIONS
     
-    MODE can be either 'minimum' for computing U, A, and  R simultaneously for the equilibrium internuclear distance,  'fixed', for computing U and A for a given R,  'coupling', for computing the coupling constant A, given U and R,  'fixed-U', for computing U given A and R.
+    MODE can be either 'minimum' for computing U, A, and  R simultaneously for 
+    the equilibrium internuclear distance,  'fixed', for computing U and A for 
+    a given R,  'coupling', for computing the coupling constant A, given U and R,  
+    'fixed-U', for computing U given A and R.
     Required options for two- and three-parameters methods:
       --Dmin arg            Minimum D value
       --U0 arg              Initial value of the electronic+nuclear energy
