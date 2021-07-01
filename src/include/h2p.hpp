@@ -1,3 +1,6 @@
+#ifndef H2P
+#define H2P
+
 #include <iostream>
 #include <vector>
 #include <fstream>
@@ -60,8 +63,8 @@ std::vector<T> ql(
     std::vector<T> ans;
     ans.reserve(N+1);
     gi::symbol x("x");
-    gi::ex ql = (2*Re*(x+1)+Ae-Ee*gi::power((x+1),2))/(x*(x+2)) 
-                    - gi::power(m,2)/(gi::power(x,2)*gi::power((x+2),2));
+    gi::ex ql = ( 2*Re*(x+1)+Ae-Ee*gi::power((x+1),2) ) / (x*(x+2)) 
+                    - gi::power(m,2)/( gi::power(x,2)*gi::power((x+2),2) );
 
     ql = gi::series_to_poly(ql.series(x, N+3));
 
@@ -150,14 +153,17 @@ std::vector<T> coefsl(
         const std::vector<T>& q_coefs
         )
 {
-    T E = R/2 - U*R*R/2;
+    // epsilon
+    T ep = R/2 - U*R*R/2;
     std::vector<T> coefs;
     coefs.reserve(N+2);
+
 
     const int ma = abs(m);
     T sum;
 
-    coefs.push_back((R + (A-E)/2 + ma*ma/2+ma/2)/(ma+1));
+    T fm1 = ( 2*A + ma + ma*ma + 4*R - 2*ep ) / ( 4*(ma + 1) );
+    coefs.push_back(fm1);
 
     for ( int j = 0; j <= N; j++ ) {
         sum = 0;
@@ -194,13 +200,11 @@ std::vector<T> coefsm(
         sum = 0;
         for ( int k = 0; k <= j-1; k++ ) 
             sum += (coefs[k]-p_coefs[k])*coefs[j-k-1];
-        sum += q_coefs[j] + s*p_coefs[j+1]/2;
+        sum += q_coefs[j] + s*p_coefs[j];
         sum = sum/(2*j + 2*s + 1);
         coefs.push_back(sum);
     }
     
     return coefs;
 }
-
-/*
-*/
+#endif
