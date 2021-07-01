@@ -25,6 +25,8 @@ Then download this program with:
 
     git clone https://github.com/javierelpianista/h2p-ricpad
     
+(this step can be avoided if downloaded from a repository).
+    
 A folder called `h2p-ricpad` will be created in the current directory.
 CD to that folder, then follow the typical procedure to build with cmake
 
