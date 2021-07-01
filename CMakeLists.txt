@@ -23,7 +23,7 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 
 # GMP, MPFR, MPC
 find_library(gmp "gmp")
-foreach(lib gmp mpfr mpc ginac cln)
+foreach(lib gmp mpfr ginac cln)
     find_library("${lib}" "${lib}")
     if ( ${${lib}} STREQUAL "${lib}-NOTFOUND" ) 
         message( FATAL_ERROR 
@@ -63,7 +63,6 @@ target_link_libraries(
     Boost::program_options
     Eigen3::Eigen
     mpfr
-    mpc
     cln
     ginac 
     )

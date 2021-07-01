@@ -4,7 +4,6 @@
 #include <iostream>
 
 #include <boost/multiprecision/mpfr.hpp>
-#include <boost/multiprecision/mpc.hpp>
 #include <boost/math/policies/error_handling.hpp>
 
 #include <ricpad/differentiate.hpp>
@@ -12,7 +11,6 @@
 
 namespace mp = boost::multiprecision;
 using mp::mpfr_float;
-using mp::mpc_complex;
 using std::cout;
 using std::endl;
 

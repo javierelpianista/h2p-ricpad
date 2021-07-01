@@ -5,7 +5,6 @@
 #include <vector>
 
 #include <boost/multiprecision/mpfr.hpp>
-#include <boost/multiprecision/mpc.hpp>
 
 #include <ricpad/conversions.hpp>
 #include <ricpad/solver.hpp>
@@ -16,7 +15,6 @@
 namespace mp = boost::multiprecision;
 
 using mp::mpfr_float;
-using mp::mpc_complex;
 
 template<typename num_t>
 void R_eq(

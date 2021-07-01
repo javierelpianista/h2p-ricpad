@@ -6,7 +6,6 @@
 
 #include <boost/program_options.hpp>
 #include <boost/multiprecision/mpfr.hpp>
-#include <boost/multiprecision/mpc.hpp>
 #include <ginac/ginac.h>
 
 #include <h2p.hpp>
@@ -22,7 +21,6 @@ namespace po = boost::program_options;
 namespace mp = boost::multiprecision;
 namespace gi = GiNaC;
 
-using mp::mpc_complex;
 using mp::mpfr_float;
 
 po::options_description 
@@ -191,7 +189,6 @@ int main(int argc, char* argv[]) {
     { 
         int ndigits = vm["ndigits"].as<int>();
         mpfr_float::default_precision(ndigits);
-        mpc_complex::default_precision(ndigits);
         gi::Digits = ndigits;
         tol = mpfr_float(vm["tol"].as<std::string>());
         h   = mpfr_float(vm["h"].as<std::string>());
