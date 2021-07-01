@@ -106,5 +106,5 @@ It can be used by writing
 
     python sweep.py <filename>
 
-Where filename is a `.csv` file with a list of sets of `l, m, I` numbers.
+Where `<filename>` is a `.csv` file with a list of sets of `l, m, I` numbers.
 File `examples/sweep_example.csv` is provided as an example input file.
