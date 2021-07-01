@@ -5,7 +5,8 @@ for the hydrogen molecule ion.
 
 # Installation
 
-This program requires cmake, a working C++ compiler, and, additionally, 
+This program is designed to run on GNU/Linux systems. 
+For building it requires cmake, a working C++ compiler, and, additionally, 
 the following libraries:
 
 * `Boost`
@@ -94,4 +95,12 @@ The following files are provided:
 
 # Computation of potential energy curves
 
-The Python script `sweep.py` that allows to use the `h2p-ricpad` program to compute the potential energy curve for several states.
+The Python3 script `sweep.py` that allows to use the `h2p-ricpad` program to compute the potential energy curve for several states.
+In order to use it, the user should open it and modify it according to their setup and preferences.
+It requires the libraries `numpy` and `mpmath`.
+
+It can be used by writing
+    python sweep.py <filename>
+
+Where filename is a `.csv` file with a list of sets of `l, m, I` numbers.
+File `examples/sweep_example.csv` is provided as an example input file.

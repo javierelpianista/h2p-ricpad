@@ -3,7 +3,7 @@
 # This script allows to compute the equilibrium internuclear distance, 
 # separation constant and electronic + nuclear energy with D = 2..15.
 #
-# No output to file is produced.
+# No output to any file is produced.
 #
 # h2p-ricpad should be linked or copied over to this folder
 
