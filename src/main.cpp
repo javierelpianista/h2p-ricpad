@@ -96,6 +96,8 @@ int main(int argc, char* argv[]) {
         ("target-digits", po::value<int>()->default_value(-1),
          "Target number of digits. If this number is reached, the program "
          "stops.")
+        ("compute-diff", po::bool_switch()->default_value(false),
+         "Compute dU/dR (only for fixed mode)")
         ;
 
     hidden.add_options()
@@ -127,7 +129,10 @@ int main(int argc, char* argv[]) {
                 [&mode](const std::string &a) -> bool {return a == mode;}
                 )
            ) {
-            cout << "Mode " << mode << " not available." << endl;
+            std::string msg = "Mode " + mode + " not available.";
+            cout << endl << std::string(msg.length(), '-') << endl;
+            cout << msg << endl;
+            cout << std::string(msg.length(), '-') << endl << endl;
             print_help_message("");
         }
     }
@@ -139,7 +144,10 @@ int main(int argc, char* argv[]) {
 
     for ( auto what: mandatory_options ) {
         if ( vm.count(what) == 0 ) {
-            cout << "Mandatory option " << what << " not provided." << endl;
+            std::string msg = "Mandatory option " + what + " not provided.";
+            cout << endl << std::string(msg.length(), '-') << endl;
+            cout << msg << endl;
+            cout << std::string(msg.length(), '-') << endl << endl;
             print_help_message();
             return 1;
         }
